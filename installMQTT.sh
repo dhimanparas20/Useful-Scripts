@@ -1,3 +1,4 @@
+# Run script as sudo
 sudo rm /var/lib/apt/lists/lock
 sudo apt update
 sudo apt upgrade -y
