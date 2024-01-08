@@ -1,0 +1,21 @@
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore environment folder (if you use virtual environments)
+/env/
+
+# Ignore local configuration files
+instance/
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+
+# Ignore log files
+*.log
+
+# Ignore generated files
+__pycache__/
+
+# vercel 
+.vercel
