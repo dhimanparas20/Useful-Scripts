@@ -1,3 +1,4 @@
+from bson import ObjectId
 import pymongo
 import random
 import string 
@@ -58,8 +59,6 @@ class MongoDB:  #Main Class
                 item["_id"] = str(item["_id"])
 
             result.append(item)
-        print('======================================')
-        print(result)
         return result   
     def count(self,data={}):
         count = self.collection.count_documents(data)
@@ -75,6 +74,8 @@ class MongoDB:  #Main Class
         else:
             return False        
     def delete(self,data={}):
+        if '_id' in data and isinstance(data['_id'], str):
+            data['_id'] = ObjectId(data['_id'])
         dlt = self.collection.delete_many(data)
         count = dlt.deleted_count
         if count > 0:
