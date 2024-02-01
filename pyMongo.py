@@ -1,5 +1,3 @@
-#pip3 install pymongo==4.6.0
-#pip3 install passlib==1.7.4
 import pymongo
 import random
 import string 
@@ -50,13 +48,19 @@ class MongoDB:  #Main Class
         #lst = [data]
         #self.collection.insert_many(lst)
         return True
-    def fetch(self,data=None,show_id=False):    
-        id = {"_id": 0} if not show_id else {"_id": 1}    
+    def fetch(self, data=None, show_id=False):
         result = []
-        res = self.collection.find(data,id)
+        projection = {"_id": 0} if show_id==False else {}
+        res = self.collection.find(data, projection)
         for item in res:
-            result.append(item)      
-        return result       
+            if show_id and "_id" in item:
+                # Convert _id to string format if show_id is True
+                item["_id"] = str(item["_id"])
+
+            result.append(item)
+        print('======================================')
+        print(result)
+        return result   
     def count(self,data={}):
         count = self.collection.count_documents(data)
         return count  
@@ -118,4 +122,4 @@ mydb.fetch()
 data = mydb.fetch({"name":"d"})
 hashpass = data[0]["password"]
 print(mydb.verifyHash("mypassword",hashpass))
-'''         
+'''       
