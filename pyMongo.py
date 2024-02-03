@@ -71,16 +71,20 @@ class MongoDB:  #Main Class
     def count(self,data={}): #Counts total no of documents in a Collection
         count = self.collection.count_documents(data)
         return count  
-    def update(self,prev,nxt): #Updates exisiting Data
-        nxt = {"$set":nxt}
-        up = self.collection.update_many(prev,nxt)
-        count  = up.modified_count
-        if count >0:
+    def update(self, prev, nxt):  # Updates existing Data
+        # Check if "_id" is in prev and convert it to ObjectId
+        if "_id" in prev:
+            prev["_id"] = ObjectId(prev["_id"])
+        nxt = {"$set": nxt}
+        up = self.collection.update_many(prev, nxt)
+        count = up.modified_count
+        
+        if count > 0:
             return True
         elif count == 0:
-            return ({"message":"Nothing To modify"})
+            return ({"message": "Nothing To modify"})
         else:
-            return False        
+            return False
     def delete(self,data={}):  #Deletes Data
         if '_id' in data and isinstance(data['_id'], str):
             data['_id'] = ObjectId(data['_id'])
