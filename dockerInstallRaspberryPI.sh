@@ -1,3 +1,6 @@
+# better way
+curl -sSL https://get.docker.com | sh
+
 # To install Docker in Raspberry PI (rasbbian os)
 sudo apt update
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common python3 python3-pip
