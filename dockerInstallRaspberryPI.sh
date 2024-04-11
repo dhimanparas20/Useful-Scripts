@@ -7,4 +7,5 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io
 sudo systemctl enable docker
 sudo systemctl start docker
+sudo systemctl statusdocker
 sudo raspi-config
