@@ -62,6 +62,7 @@ echo "listener 1883 0.0.0.0" >> /etc/mosquitto/conf.d/protocols.conf
 echo "protocol mqtt" >> /etc/mosquitto/conf.d/protocols.conf
 echo "listener 1884 0.0.0.0" >> /etc/mosquitto/conf.d/protocols.conf
 echo "protocol websockets" >> /etc/mosquitto/conf.d/protocols.conf
+echo -e "2069\n2069" | mosquitto_passwd -c /etc/mosquitto/passwd mst  #Creates and setup mosquitto password
 ufw allow 1883/tcp
 ufw allow 1884/tcp
 #mosquitto_passwd -c /etc/mosquitto/passwd mst
@@ -74,9 +75,6 @@ wget -P /Downloads https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/
 cp /Downloads/NginxPIServer.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/NginxPIServer.conf /etc/nginx/sites-enabled/
 nginx -t
-
-# Setting Up password for mosquitto MQTT
-mosquitto_passwd -c /etc/mosquitto/passwd mst
 
 #Finally Restarting all the service
 systemctl restart docker && systemctl status docker
