@@ -19,7 +19,7 @@ fi
 #The Basics
 apt update
 apt upgrade -y
-apt install git snapd core python3 python3-pip nginx mosquitto mosquitto-clients ufw neofetch -y
+apt install git snapd python3 python3-pip nginx mosquitto mosquitto-clients ufw neofetch -y
 #install ngrok
 snap install ngrok
 clear
