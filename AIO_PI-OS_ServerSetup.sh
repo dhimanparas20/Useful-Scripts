@@ -110,6 +110,7 @@ sleep 2
 clear
 mkdir Downloads 
 wget -P $(pwd)/Downloads/ https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/NginxPIServer.conf https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/cronjob.sh
+cd $(pwd)/Downloads/ && chmod +x cronjob.sh
 echo "---------------------------------------------------------------------------------"
 echo "                          Scripts downloaded to /home/Downloads                  "
 echo "---------------------------------------------------------------------------------"
