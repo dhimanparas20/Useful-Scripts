@@ -84,9 +84,9 @@ systemctl restart mosquitto && systemctl status mosquitto --no-pager
 
 #clone and run Mongo Admin Pannel
 cd
-git clone https://github.com/dhimanparas20/Mongo-Admin-Pannel.git
-cd Mongo-Admin-Pannel && docker build -t MongoAdminPannel .
-docker run -d --network=host --name MongoAdminPannel MongoAdminPannel
+git clone https://github.com/dhimanparas20/Mongo-Admin-Pannel.git MongoAdminPannel
+cd MongoAdminPannel && docker build -t mongo_admin_pannel .
+docker run -d --network=host --name mongo_admin_pannel mongo_admin_pannel
 cd
 
 #Writing a cron file
