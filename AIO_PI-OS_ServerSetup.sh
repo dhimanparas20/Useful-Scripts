@@ -97,7 +97,7 @@ echo "listener 1883 0.0.0.0" >> /etc/mosquitto/conf.d/protocols.conf
 echo "protocol mqtt" >> /etc/mosquitto/conf.d/protocols.conf
 echo "listener 1884 0.0.0.0" >> /etc/mosquitto/conf.d/protocols.conf
 echo "protocol websockets" >> /etc/mosquitto/conf.d/protocols.conf
-echo -e "2069\n2069" | mosquitto_passwd -c /etc/mosquitto/passwd mst  #Creates and setup mosquitto password
+mosquitto_passwd -c /etc/mosquitto/passwd mst <<< "2069" #Creates and setup mosquitto password
 ufw allow 1883/tcp
 ufw allow 1884/tcp
 echo "---------------------------------------------------------------------------------"
