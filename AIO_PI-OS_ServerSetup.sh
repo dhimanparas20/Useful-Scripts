@@ -92,7 +92,6 @@ docker run -d --network=host --name MongoAdminPannel MongoAdminPannel
 cd
 
 #Writing a cron file
-#!/bin/bash
 export EDITOR=nano
 temp_cron=$(mktemp)
 echo "@reboot $(pwd)/Downloads/cronjob.sh" >> "$temp_cron"
