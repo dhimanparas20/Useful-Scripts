@@ -1,6 +1,9 @@
 #The script must be run uisng sudo
 # The script installs the following packages: Nginx,MongoDB,MosquittoMQTT,Docker,neofetch,ngrok,git,snapd,ufw
 #The script also setups some of configs wherever needed
+
+#Start
+clear
 #!/bin/bash
 
 # Enable immediate exit on error
