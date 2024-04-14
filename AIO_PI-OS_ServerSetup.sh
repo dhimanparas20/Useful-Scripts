@@ -24,6 +24,7 @@ apt install git snapd python3 python3-pip nginx mosquitto mosquitto-clients ufw 
 snap install ngrok
 clear
 neofetch
+sleep 2
 
 #Install Docker
 curl -sSL https://get.docker.com | sh
@@ -34,16 +35,22 @@ sudo mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MA
 set -e
 
 #Docker compose
+clear
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
+sleep 2
 
 #Store git passwords and add user signature
+clear
 git config --global user.name "dhimanparas20"
 git config --global user.email "dhimanparas20@gmail.com"
 git config --global credential.helper cache
 git config --global credential.helper store
+sleep 2
 
 #installing MongoDB
+clear
+delay 2000
 wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - 
 echo "deb [ arch=arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list
 apt-get update --allow-insecure-repositories
@@ -53,14 +60,18 @@ echo "mongodb-org-server hold" | dpkg --set-selections &&
 echo "mongodb-org-shell hold" | dpkg --set-selections &&
 echo "mongodb-org-mongos hold" | dpkg --set-selections &&
 echo "mongodb-org-tools hold" | dpkg --set-selections
+sleep 2
 
 #Start and enable all services
+clear
 systemctl start docker && systemctl enable docker
 systemctl start mongod && systemctl enable mongod
 systemctl start nginx && systemctl enable nginx
 systemctl start mosquitto && systemctl enable mosquitto
+sleep 2
 
 #Edit Mosquitto Config File
+clear
 echo "allow_anonymous false" >> /etc/mosquitto/mosquitto.conf
 echo "password_file /etc/mosquitto/passwd" >> /etc/mosquitto/mosquitto.conf
 echo "listener 1883 0.0.0.0" >> /etc/mosquitto/conf.d/protocols.conf
@@ -70,37 +81,48 @@ echo "protocol websockets" >> /etc/mosquitto/conf.d/protocols.conf
 echo -e "2069\n2069" | mosquitto_passwd -c /etc/mosquitto/passwd mst  #Creates and setup mosquitto password
 ufw allow 1883/tcp
 ufw allow 1884/tcp
+sleep 2
 #mosquitto_passwd -c /etc/mosquitto/passwd mst
 
 #Downloading of desired scripts
+clear
 mkdir Downloads 
 wget -P $(pwd)/Downloads/ https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/NginxPIServer.conf https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/cronjob.sh
+sleep 2
 
 #Setting up Nginx
+clear
 cp /Downloads/NginxPIServer.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/NginxPIServer.conf /etc/nginx/sites-enabled/
 nginx -t
+sleep 2
 
 #Finally Restarting all the service
+clear
 systemctl restart docker && systemctl status docker --no-pager
 systemctl restart mongod && systemctl status mongod --no-pager
 systemctl restart nginx && systemctl status nginx --no-pager
 systemctl restart mosquitto && systemctl status mosquitto --no-pager
+sleep 2
 
 #clone and run Mongo Admin Pannel
+clear
 cd
 git clone https://github.com/dhimanparas20/Mongo-Admin-Pannel.git MongoAdminPannel
 cd MongoAdminPannel && docker build -t mongo_admin_pannel .
 docker run -d --network=host --name mongo_admin_pannel mongo_admin_pannel
 cd
+sleep 2
 
 #Writing a cron file
+clear
 export EDITOR=nano
 temp_cron=$(mktemp)
 echo "@reboot $(pwd)/Downloads/cronjob.sh" >> "$temp_cron"
 crontab "$temp_cron"
 rm "$temp_cron"
 echo "Cron job added successfully."
+sleep 2
 
 #Done
 clear
