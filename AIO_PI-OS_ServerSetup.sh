@@ -69,7 +69,7 @@ ufw allow 1884/tcp
 
 #Downloading of desired scripts
 mkdir Downloads 
-wget -P /Downloads https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/NginxPIServer.conf https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/cronjob.sh
+wget -P $(pwd)/Downloads/ https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/NginxPIServer.conf https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/cronjob.sh
 
 #Setting up Nginx
 cp /Downloads/NginxPIServer.conf /etc/nginx/sites-available/
