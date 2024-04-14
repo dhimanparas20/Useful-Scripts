@@ -1,6 +1,9 @@
 #The script must be run uisng sudo
 # The script installs the following packages: Nginx,MongoDB,MosquittoMQTT,Docker,neofetch,ngrok,git,snapd,ufw
 #The script also setups some of configs wherever needed
+# HOW to rin ?
+# wget https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/AIO_PI-OS_ServerSetup.sh && chmod +x AIO_PI-OS_ServerSetup.sh && time sudo ./AIO_PI-OS_ServerSetup.sh
+
 
 #Start
 clear
