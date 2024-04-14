@@ -117,7 +117,7 @@ sleep 2
 
 #Setting up Nginx
 clear
-cp /Downloads/NginxPIServer.conf /etc/nginx/sites-available/
+cp $(pwd)/Downloads/NginxPIServer.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/NginxPIServer.conf /etc/nginx/sites-enabled/
 nginx -t
 echo "---------------------------------------------------------------------------------"
