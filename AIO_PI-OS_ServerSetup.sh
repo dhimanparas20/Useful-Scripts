@@ -29,8 +29,8 @@ neofetch
 curl -sSL https://get.docker.com | sh
 
 #Docker compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-udo chmod +x /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 
 #Store git passwords and add user signature
 git config --global user.name "dhimanparas20"
