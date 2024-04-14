@@ -28,6 +28,11 @@ neofetch
 #Install Docker
 curl -sSL https://get.docker.com | sh
 
+# Allow installing pip modules globally
+set +e
+sudo mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.old
+set -e
+
 #Docker compose
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
