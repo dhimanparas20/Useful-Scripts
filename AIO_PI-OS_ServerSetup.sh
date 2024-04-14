@@ -144,7 +144,7 @@ cd MongoAdminPannel && docker build -t mongo_admin_pannel .
 docker run -d --network=host --name mongo_admin_pannel mongo_admin_pannel
 cd
 echo "---------------------------------------------------------------------------------"
-echo "                   Deployed Mongo Admin PAnnel on port 5000                      "
+echo "                   Deployed Mongo Admin PAnnel on port 5500                      "
 echo "---------------------------------------------------------------------------------"
 sleep 2
 
@@ -165,4 +165,13 @@ sleep 2
 clear
 echo "---------------------------------------------------------------------------------"
 echo "                                     DONE :-)                                    "
+echo "---------------------------------------------------------------------------------"
+clear
+cd
+git clone https://github.com/dhimanparas20/MST-Automations.git
+cd MST-Automations && docker build -t automation .
+docker run -d --network=host --name automation automation
+cd
+echo "---------------------------------------------------------------------------------"
+echo "                         Deployed Room Automation                                "
 echo "---------------------------------------------------------------------------------"
