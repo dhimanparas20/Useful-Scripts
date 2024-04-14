@@ -77,10 +77,10 @@ ln -s /etc/nginx/sites-available/NginxPIServer.conf /etc/nginx/sites-enabled/
 nginx -t
 
 #Finally Restarting all the service
-systemctl restart docker && systemctl status docker
-systemctl restart mongod && systemctl status mongod
-systemctl restart nginx && systemctl status nginx
-systemctl restart mosquitto && systemctl status mosquitto
+systemctl restart docker && systemctl status docker --no-pager
+systemctl restart mongod && systemctl status mongod --no-pager
+systemctl restart nginx && systemctl status nginx --no-pager
+systemctl restart mosquitto && systemctl status mosquitto --no-pager
 
 #clone and run Mongo Admin Pannel
 cd
@@ -98,6 +98,7 @@ rm "$temp_cron"
 echo "Cron job added successfully."
 
 #Done
+clear
 echo "---------------------------------------------------------------------------------"
 echo "                                     DONE :-)                                    "
 echo "---------------------------------------------------------------------------------"
