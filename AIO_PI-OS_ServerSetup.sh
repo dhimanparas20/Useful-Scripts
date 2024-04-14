@@ -32,6 +32,9 @@ sleep 2
 #Install Docker
 clear
 curl -sSL https://get.docker.com | sh
+echo "---------------------------------------------------------------------------------"
+echo "                                  Installed Docker                               "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 # Allow installing pip modules globally
@@ -43,6 +46,9 @@ set -e
 clear
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
+echo "---------------------------------------------------------------------------------"
+echo "                             Installed Docker Compose                            "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Store git passwords and add user signature
@@ -51,6 +57,9 @@ git config --global user.name "dhimanparas20"
 git config --global user.email "dhimanparas20@gmail.com"
 git config --global credential.helper cache
 git config --global credential.helper store
+echo "---------------------------------------------------------------------------------"
+echo "                                  Added Git Configs                              "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #installing MongoDB
@@ -65,6 +74,9 @@ echo "mongodb-org-server hold" | dpkg --set-selections &&
 echo "mongodb-org-shell hold" | dpkg --set-selections &&
 echo "mongodb-org-mongos hold" | dpkg --set-selections &&
 echo "mongodb-org-tools hold" | dpkg --set-selections
+echo "---------------------------------------------------------------------------------"
+echo "                                  Installed MongoDB                              "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Start and enable all services
@@ -73,6 +85,9 @@ systemctl start docker && systemctl enable docker
 systemctl start mongod && systemctl enable mongod
 systemctl start nginx && systemctl enable nginx
 systemctl start mosquitto && systemctl enable mosquitto
+echo "---------------------------------------------------------------------------------"
+echo "                         All Services Started & Anabled                          "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Edit Mosquitto Config File
@@ -86,6 +101,9 @@ echo "protocol websockets" >> /etc/mosquitto/conf.d/protocols.conf
 echo -e "2069\n2069" | mosquitto_passwd -c /etc/mosquitto/passwd mst  #Creates and setup mosquitto password
 ufw allow 1883/tcp
 ufw allow 1884/tcp
+echo "---------------------------------------------------------------------------------"
+echo "                      MOsquitto MQTT configs Done                                "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 #mosquitto_passwd -c /etc/mosquitto/passwd mst
 
@@ -93,6 +111,9 @@ sleep 2
 clear
 mkdir Downloads 
 wget -P $(pwd)/Downloads/ https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/NginxPIServer.conf https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/cronjob.sh
+echo "---------------------------------------------------------------------------------"
+echo "                          Scripts downloaded to /home/Downloads                  "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Setting up Nginx
@@ -100,6 +121,9 @@ clear
 cp /Downloads/NginxPIServer.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/NginxPIServer.conf /etc/nginx/sites-enabled/
 nginx -t
+echo "---------------------------------------------------------------------------------"
+echo "                                  NGINX Setup Done                               "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Finally Restarting all the service
@@ -108,6 +132,9 @@ systemctl restart docker && systemctl status docker --no-pager
 systemctl restart mongod && systemctl status mongod --no-pager
 systemctl restart nginx && systemctl status nginx --no-pager
 systemctl restart mosquitto && systemctl status mosquitto --no-pager
+echo "---------------------------------------------------------------------------------"
+echo "                          All services Restarted                                 "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #clone and run Mongo Admin Pannel
@@ -117,6 +144,9 @@ git clone https://github.com/dhimanparas20/Mongo-Admin-Pannel.git MongoAdminPann
 cd MongoAdminPannel && docker build -t mongo_admin_pannel .
 docker run -d --network=host --name mongo_admin_pannel mongo_admin_pannel
 cd
+echo "---------------------------------------------------------------------------------"
+echo "        Deployed Mongo Admin PAnnel on 'http://192.168.1.100:5500'               "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Writing a cron file
@@ -127,6 +157,9 @@ echo "@reboot $(pwd)/Downloads/cronjob.sh" >> "$temp_cron"
 crontab "$temp_cron"
 rm "$temp_cron"
 echo "Cron job added successfully."
+echo "---------------------------------------------------------------------------------"
+echo "                              Cron JOb Added                                     "
+echo "---------------------------------------------------------------------------------"
 sleep 2
 
 #Done
