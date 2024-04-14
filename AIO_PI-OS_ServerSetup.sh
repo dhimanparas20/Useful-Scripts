@@ -30,7 +30,9 @@ neofetch
 sleep 2
 
 #Install Docker
+clear
 curl -sSL https://get.docker.com | sh
+sleep 2
 
 # Allow installing pip modules globally
 set +e
