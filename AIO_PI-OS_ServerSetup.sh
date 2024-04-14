@@ -86,7 +86,7 @@ systemctl start mongod && systemctl enable mongod
 systemctl start nginx && systemctl enable nginx
 systemctl start mosquitto && systemctl enable mosquitto
 echo "---------------------------------------------------------------------------------"
-echo "                         All Services Started & Anabled                          "
+echo "                         All Services Started & Enabled                          "
 echo "---------------------------------------------------------------------------------"
 sleep 2
 
@@ -102,7 +102,7 @@ echo -e "2069\n2069" | mosquitto_passwd -c /etc/mosquitto/passwd mst  #Creates a
 ufw allow 1883/tcp
 ufw allow 1884/tcp
 echo "---------------------------------------------------------------------------------"
-echo "                      MOsquitto MQTT configs Done                                "
+echo "                      M0squitto MQTT configs Done                                "
 echo "---------------------------------------------------------------------------------"
 sleep 2
 #mosquitto_passwd -c /etc/mosquitto/passwd mst
@@ -145,7 +145,7 @@ cd MongoAdminPannel && docker build -t mongo_admin_pannel .
 docker run -d --network=host --name mongo_admin_pannel mongo_admin_pannel
 cd
 echo "---------------------------------------------------------------------------------"
-echo "        Deployed Mongo Admin PAnnel on 'http://192.168.1.100:5500'               "
+echo "                   Deployed Mongo Admin PAnnel on port 5000                      "
 echo "---------------------------------------------------------------------------------"
 sleep 2
 
