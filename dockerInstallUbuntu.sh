@@ -8,3 +8,7 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io
 sudo systemctl enable docker
 sudo systemctl start docker
 docker --version
+
+sudo docker context ls
+docker context use desktop-linux
+sudo systemctl restart docker 
