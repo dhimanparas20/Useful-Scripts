@@ -1,0 +1,186 @@
+> (Greater Than): The > symbol is used for output redirection, meaning it directs the output of a command to a file instead of the standard output (usually the terminal). If the file does not exist, it will be created; if it does exist, it will be overwritten.
+
+Example:
+
+bash
+
+ls > file_list.txt
+
+>> (Double Greater Than): Similar to >, the >> symbol is used for output redirection, but it appends the output to the end of the specified file rather than overwriting it.
+
+Example:
+
+bash
+
+echo "Hello, World!" >> greetings.txt
+
+>>>: This is not a standard Linux symbol in command-line operations, so it doesn't have a specific meaning or usage.
+
+< (Less Than): The < symbol is used for input redirection, allowing a command to take input from a file instead of from the standard input (usually the keyboard).
+
+Example:
+
+bash
+
+sort < unsorted_list.txt
+
+<< (Double Less Than): This is used in shell scripting for a "here document" or "here string," providing input to a command or script from the script itself rather than from an external file.
+
+Example:
+
+bash
+
+cat << END
+This is a
+multiline
+text block.
+END
+
+<<<: This is not a standard Linux symbol in command-line operations, so it doesn't have a specific meaning or usage.
+
+| (Pipe): The | symbol is used to combine multiple commands, allowing the output of one command to be used as input for another command. This is known as piping.
+
+Example:
+
+bash
+
+ls -l | grep "txt"
+
+|| (Double Pipe): This is used in shell scripting for logical OR operations, typically in conditional statements to execute commands based on the success or failure of preceding commands.
+
+Example:
+
+bash
+
+    command1 || echo "Command failed"
+
+& (Ampersand): The & symbol is used for job control in the shell. When appended to a command, it allows the command to run in the background, freeing up the terminal for other tasks.
+
+    Example:
+
+long_running_command &
+
+* (Asterisk/Wildcard): The * symbol is used as a wildcard character in file and directory operations. It represents zero or more characters in filenames or patterns.
+
+Example:
+
+bash
+
+ls *.txt
+
+? (Question Mark): The ? symbol is used as a wildcard character in file and directory operations. It represents a single character in filenames or patterns.
+
+Example:
+
+bash
+
+ls file?.txt
+
+~ (Tilde): The ~ symbol represents the home directory of the current user. It is commonly used as a shorthand for referring to the home directory.
+
+Example:
+
+bash
+
+cd ~/Documents
+
+! (Exclamation Mark): The ! symbol is used in history substitution in the shell. It can be used to recall and re-execute previous commands from the command history.
+
+Example:
+
+bash
+
+!ls
+
+$ (Dollar Sign): The $ symbol is used to indicate variables in shell scripting. When followed by a variable name, it represents the value of that variable.
+
+Example:
+
+bash
+
+echo $USER
+
+# (Hash/Pound): The # symbol is used for comments in shell scripts. Anything following a # on a line is treated as a comment and is ignored by the shell.
+
+Example:
+
+bash
+
+# This is a comment
+echo "Hello, World!"
+
+: (Colon): The : symbol is used as a null command or a placeholder in shell scripting. It is sometimes used in loops or conditional statements.
+
+Example:
+
+bash
+
+    while :
+    do
+        echo "Looping indefinitely"
+        sleep 1
+    done
+
+
+; (Semicolon): The ; symbol is used to separate multiple commands on a single line. It allows you to execute commands sequentially, one after another.
+
+    Example:
+
+    bash
+
+command1 ; command2 ; command3
+
+() (Parentheses): Parentheses are used for grouping commands in the shell. Commands within parentheses are executed in a subshell environment.
+
+Example:
+
+bash
+
+(cd /path/to/directory && ls)
+
+[] (Square Brackets): Square brackets are commonly used in conditional expressions and tests in shell scripting.
+
+Example:
+
+bash
+
+if [ "$var" -eq 10 ]; then
+    echo "Variable is equal to 10"
+fi
+
+{} (Curly Braces): Curly braces are used for grouping commands and creating command blocks in shell scripts. They are also used in brace expansion.
+
+Example:
+
+bash
+
+{
+    echo "Command 1"
+    echo "Command 2"
+}
+
+! (Negation): The ! symbol can be used in conditional expressions for negation or in shell scripting for logical NOT operations.
+
+Example:
+
+bash
+
+if ! command; then
+    echo "Command failed"
+fi
+
+&> (Redirection of both stdout and stderr): The &> symbols are used for redirecting both standard output (stdout) and standard error (stderr) to a file.
+
+Example:
+
+bash
+
+command &> output.log
+
+&& (Logical AND): The && symbol is used in shell scripting for conditional execution, where the second command is executed only if the first command succeeds.
+
+Example:
+
+bash
+
+    command1 && command2
