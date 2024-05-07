@@ -15,7 +15,7 @@ set -e
 # Check if the script is run with sudo
 if [ "$(id -u)" -ne 0 ]; then
     echo "Please run this script with sudo:"
-    echo "sudo ./ok.sh"
+    echo "time sudo ./AIO_PI-OS_ServerSetup.sh"
     exit 1
 fi
 
