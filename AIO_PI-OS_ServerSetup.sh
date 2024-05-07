@@ -31,11 +31,12 @@ sleep 2
 
 #Install Docker
 clear
-curl -sSL https://get.docker.com | sh
 echo "---------------------------------------------------------------------------------"
-echo "                                  Installed Docker                               "
+echo "                                 Installing Docker                               "
 echo "---------------------------------------------------------------------------------"
 sleep 2
+curl -sSL https://get.docker.com | sh
+
 
 # Allow installing pip modules globally
 set +e
@@ -44,26 +45,31 @@ set -e
 
 #Docker compose
 clear
-curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
 echo "---------------------------------------------------------------------------------"
-echo "                             Installed Docker Compose                            "
+echo "                            Installing Docker Compose                            "
 echo "---------------------------------------------------------------------------------"
 sleep 2
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
 
 #Store git passwords and add user signature
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                                 Adding Git Configs                              "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 git config --global user.name "dhimanparas20"
 git config --global user.email "dhimanparas20@gmail.com"
 git config --global credential.helper cache
 git config --global credential.helper store
-echo "---------------------------------------------------------------------------------"
-echo "                                  Added Git Configs                              "
-echo "---------------------------------------------------------------------------------"
-sleep 2
 
 #installing MongoDB
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                                 Installing MongoDB                              "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - 
 echo "deb [ arch=arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list
 apt-get update --allow-insecure-repositories
@@ -73,24 +79,25 @@ echo "mongodb-org-server hold" | dpkg --set-selections &&
 echo "mongodb-org-shell hold" | dpkg --set-selections &&
 echo "mongodb-org-mongos hold" | dpkg --set-selections &&
 echo "mongodb-org-tools hold" | dpkg --set-selections
-echo "---------------------------------------------------------------------------------"
-echo "                                  Installed MongoDB                              "
-echo "---------------------------------------------------------------------------------"
-sleep 2
+
 
 #Start and enable all services
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                       All Services Starting & Enabling                          "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 systemctl start docker && systemctl enable docker
 systemctl start mongod && systemctl enable mongod
 systemctl start nginx && systemctl enable nginx
 systemctl start mosquitto && systemctl enable mosquitto
-echo "---------------------------------------------------------------------------------"
-echo "                         All Services Started & Enabled                          "
-echo "---------------------------------------------------------------------------------"
-sleep 2
 
 #Edit Mosquitto Config File
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                      M0squitto MQTT config                                      "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 echo "allow_anonymous false" >> /etc/mosquitto/mosquitto.conf
 echo "password_file /etc/mosquitto/passwd" >> /etc/mosquitto/mosquitto.conf
 echo "listener 1883 0.0.0.0" >> /etc/mosquitto/conf.d/protocols.conf
@@ -100,67 +107,67 @@ echo "protocol websockets" >> /etc/mosquitto/conf.d/protocols.conf
 mosquitto_passwd -c /etc/mosquitto/passwd mst <<< "2069" #Creates and setup mosquitto password
 ufw allow 1883/tcp
 ufw allow 1884/tcp
-echo "---------------------------------------------------------------------------------"
-echo "                      M0squitto MQTT configs Done                                "
-echo "---------------------------------------------------------------------------------"
-sleep 2
+
 #mosquitto_passwd -c /etc/mosquitto/passwd mst
 
 #Downloading of desired scripts
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                          Scripts downloading to /home/Downloads                  "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 mkdir Downloads 
 wget -P $(pwd)/Downloads/ https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/NginxPIServer.conf https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/cronjob.sh
 cd $(pwd)/Downloads/ && chmod +x cronjob.sh
-echo "---------------------------------------------------------------------------------"
-echo "                          Scripts downloaded to /home/Downloads                  "
-echo "---------------------------------------------------------------------------------"
-sleep 2
 
 #Setting up Nginx
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                                  NGINX Setup                                    "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 cp $(pwd)/Downloads/NginxPIServer.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/NginxPIServer.conf /etc/nginx/sites-enabled/
 nginx -t
-echo "---------------------------------------------------------------------------------"
-echo "                                  NGINX Setup Done                               "
-echo "---------------------------------------------------------------------------------"
-sleep 2
 
 #Finally Restarting all the service
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                          All services Restarting                                "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 systemctl restart docker && systemctl status docker --no-pager
 systemctl restart mongod && systemctl status mongod --no-pager
 systemctl restart nginx && systemctl status nginx --no-pager
 systemctl restart mosquitto && systemctl status mosquitto --no-pager
-echo "---------------------------------------------------------------------------------"
-echo "                          All services Restarted                                 "
-echo "---------------------------------------------------------------------------------"
-sleep 2
+
 
 #clone and run Mongo Admin Pannel
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                   Deploy Mongo Admin PAnnel on port 5500                        "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 cd
 git clone https://github.com/dhimanparas20/Mongo-Admin-Pannel.git MongoAdminPannel
 cd MongoAdminPannel && docker build -t mongo_admin_pannel .
 docker run -d --network=host --name mongo_admin_pannel mongo_admin_pannel
 cd
-echo "---------------------------------------------------------------------------------"
-echo "                   Deployed Mongo Admin PAnnel on port 5500                      "
-echo "---------------------------------------------------------------------------------"
-sleep 2
+
 
 #Writing a cron file
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                              Cron JOb Adding                                    "
+echo "---------------------------------------------------------------------------------"
+sleep 2
 export EDITOR=nano
 temp_cron=$(mktemp)
 echo "@reboot $(pwd)/Downloads/cronjob.sh" >> "$temp_cron"
 crontab "$temp_cron"
 rm "$temp_cron"
 echo "Cron job added successfully."
-echo "---------------------------------------------------------------------------------"
-echo "                              Cron JOb Added                                     "
-echo "---------------------------------------------------------------------------------"
-sleep 2
+
 
 #Done
 clear
@@ -168,14 +175,14 @@ echo "--------------------------------------------------------------------------
 echo "                                     DONE :-)                                    "
 echo "---------------------------------------------------------------------------------"
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                        deploying Room Automation                                "
+echo "---------------------------------------------------------------------------------"
 cd
 git clone https://github.com/dhimanparas20/MST-Automations.git
 cd MST-Automations && docker build -t automation .
 docker run -d --network=host --name automation automation
 cd
-echo "---------------------------------------------------------------------------------"
-echo "                         Deployed Room Automation                                "
-echo "---------------------------------------------------------------------------------"
 
 #Attain Sttaic IP
 interface=$(ip route get 8.8.8.8 | awk 'NR==1 {print $5}')
