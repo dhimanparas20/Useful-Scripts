@@ -22,7 +22,7 @@ fi
 #The Basics
 apt update
 apt upgrade -y
-apt install git snapd python3 python3-pip nginx mosquitto mosquitto-clients ufw neofetch lolcat net-tools htop -y
+apt install git snapd python3 python3-pip nginx mosquitto mosquitto-clients ufw neofetch lolcat net-tools htop network-manager -y
 #install ngrok
 snap install ngrok
 clear
@@ -176,3 +176,27 @@ cd
 echo "---------------------------------------------------------------------------------"
 echo "                         Deployed Room Automation                                "
 echo "---------------------------------------------------------------------------------"
+
+#Attain Sttaic IP
+interface=$(ip route get 8.8.8.8 | awk 'NR==1 {print $5}')
+echo $interface
+nmcli connection show
+interface="preconfigured"
+
+nmcli connection modify "$interface" ipv4.addresses 192.168.1.100/24
+nmcli connection modify "$interface" ipv4.gateway 192.168.1.1
+nmcli connection modify "$interface" ipv4.dns 192.168.1.1
+nmcli connection modify "$interface" ipv4.method manual
+
+nmcli connection down "preconfigured"
+nmcli connection up "preconfigured"
+echo "---------------------------------------------------------------------------------"
+echo "                           Reserved Static IP                                    "
+echo "---------------------------------------------------------------------------------"
+sleep 2
+clear 
+echo "---------------------------------------------------------------------------------"
+echo "                        Rebooting in 5 seconds                                   "
+echo "---------------------------------------------------------------------------------"
+sleep 5
+reboot 
