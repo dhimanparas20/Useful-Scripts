@@ -24,6 +24,6 @@
 22. [Infinity Free](https://infinityfree.net/)
 
 
-## Some tricks/Hacks/Methods i usually forget
+## Some tricks/Hacks/Methods I usually forget
 
-- Soon
+- Use WhiteNoise to serve Static Content in django with Debug=False.
