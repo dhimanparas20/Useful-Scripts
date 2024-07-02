@@ -1,0 +1,25 @@
+List of Free Sites where I can Deploy my Projects or use CLI
+
+1: Google Cloud Shell
+2: Adaptable
+3: Back4App
+4: Cyclic
+5: Koyeb
+6: Render
+7: Vercel
+8: Netlify
+9: Zeet.co 
+10: Replit 
+11: Gitpod
+12: Github Railways
+13: Fly.io
+14: https://www.katacoda.com/
+15: https://stackblitz.com/
+16: https://codesandbox.io/
+17: Codeberg Pages
+18: Coolify
+19: Infinity Free
+20: Firebase
+21: Github Copilot
+22: Google Collab
+23: Google Quicklabs

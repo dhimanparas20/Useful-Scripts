@@ -1,4 +1,5 @@
 #!/bin/bash
+# crontab -e
 
 # Start Docker containers with fixed names
 sudo docker stop automation
