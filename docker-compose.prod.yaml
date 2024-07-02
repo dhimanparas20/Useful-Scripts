@@ -1,0 +1,84 @@
+version: '3.4'
+
+services:
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_volume:/data
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    volumes:
+        - rabbitmq_volume:/var/lib/rabbitmq
+  gunicorn:
+    build:
+      context: backend
+      dockerfile: prod.Dockerfile
+    command: gunicorn --bind=0.0.0.0:8001 backend.wsgi:application -w 2 --log-level=debug
+    pull_policy: always
+    env_file:
+      - backend/.env
+    depends_on:
+      - redis
+      - rabbitmq
+    expose:
+      - 8001
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - static_volume:/home/app/static
+    depends_on:
+      - gunicorn
+    ports:
+      - "80:80"
+  celery:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: celery -A backend worker -l info
+    env_file:
+      - backend/.env
+    volumes:
+      - ./backend:/app/code
+    depends_on:
+      - gunicorn
+      - redis
+      - rabbitmq
+  celery-beat:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: celery -A backend beat -l info
+    env_file:
+      - backend/.env
+    volumes:
+      - ./backend:/app/code
+    depends_on:
+      - gunicorn
+      - redis
+      - rabbitmq
+  celery-flower:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: celery -A backend flower
+    env_file:
+      - backend/.env
+    depends_on:
+      - celery
+      - celery-beat
+    ports:
+      - "5555:5555"
+volumes:
+  redis_volume:
+  rabbitmq_volume:
+  static_volume:

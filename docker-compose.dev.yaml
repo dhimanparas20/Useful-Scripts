@@ -1,0 +1,75 @@
+version: '3.4'
+
+services:
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_volume:/data
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    volumes:
+        - rabbitmq_volume:/var/lib/rabbitmq
+  backend:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    pull_policy: always
+    env_file:
+      - backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/code
+    depends_on:
+      - redis
+      - rabbitmq
+  celery:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: celery -A backend worker
+    env_file:
+      - backend/.env
+    volumes:
+      - ./backend:/app/code
+    depends_on:
+      - backend
+      - redis
+      - rabbitmq
+  celery-beat:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: celery -A backend beat
+    env_file:
+      - backend/.env
+    volumes:
+      - ./backend:/app/code
+    depends_on:
+      - backend
+      - redis
+      - rabbitmq
+  celery-flower:
+    build:
+      context: backend
+      dockerfile: dev.Dockerfile
+    command: celery -A backend flower
+    env_file:
+      - backend/.env
+    depends_on:
+      - celery
+      - celery-beat
+    ports:
+      - "5555:5555"
+volumes:
+  redis_volume:
+  rabbitmq_volume:
