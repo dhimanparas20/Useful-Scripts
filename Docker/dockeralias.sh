@@ -1,11 +1,11 @@
-chmod 777 /var/run/docker.sock
+sudo chmod 777 /var/run/docker.sock
 alias dps="docker ps -a"
 alias dimg="docker images"
 alias drmi="docker rmi -f "
 alias drm="docker rm -f "
 alias dup="docker compose up"
 alias dup-d="docker compose up -d"
-alias dbuild="docker compose build --prune"
+alias dbuild="docker compose build"
 alias dlog="docker logs -f "
 alias dbuildup="docker compose build && docker compose up"
 alias ddown="docker compose down"
