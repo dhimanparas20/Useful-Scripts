@@ -27,3 +27,4 @@
 ## Some tricks/Hacks/Methods I usually forget
 
 - Use WhiteNoise to serve Static Content in django with Debug=False.
+- When setting up new server. Assign Static IP to it 
