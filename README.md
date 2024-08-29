@@ -24,6 +24,7 @@
 22. [Infinity Free](https://infinityfree.net/)
 23. [Zeabur](https://zeabur.com/pricing)
 24. [Neon tech](https://neon.tech/pricing)
+25. [Cyclic sh](https://www.cyclic.sh/pricing/)
 
 
 ## Some tricks/Hacks/Methods I usually forget
