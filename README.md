@@ -22,6 +22,8 @@
 20. [Project IDX](https://idx.google.com/)
 21. [Github CLI](https://cli.github.com/)
 22. [Infinity Free](https://infinityfree.net/)
+23. [Zeabur](https://zeabur.com/pricing)
+24. [Neon tech](https://neon.tech/pricing)
 
 
 ## Some tricks/Hacks/Methods I usually forget
