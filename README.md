@@ -7,7 +7,7 @@
 5. 🟢 [Koyeb](https://app.koyeb.com/)
 6. 🟢 [Render](https://dashboard.render.com/)
 7. [Vercel](https://vercel.com/)
-8. [Netlify](https://app.netlify.com/teams/dhimanparas20/overview)
+8. [Netlify](https://app.netlify.com/teams/dhimanparas20/overview)  (no docker support) 
 9. 🔴 [Zeet.co](https://zeet.co/team-dhimanparas20/console/home)  (uses aws or gcp account in backend)
 10. [Replit](https://replit.com/~)  (vs code editor)
 11. [Gitpod](https://gitpod.io/)  (vs code editor) (50 hours permonth)
