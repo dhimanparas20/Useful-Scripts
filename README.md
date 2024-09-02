@@ -4,7 +4,7 @@
 2. 🟢 [Adaptable](https://adaptable.io/app/dashboard#)
 3. 🔴 [Back4App](https://dashboard.back4app.com/apps)  (github repo based issues)
 4. [Python Anywhere](https://www.pythonanywhere.com/login/)
-5. [Koyeb](https://app.koyeb.com/)
+5. 🟢 [Koyeb](https://app.koyeb.com/)
 6. 🟢 [Render](https://dashboard.render.com/)
 7. [Vercel](https://vercel.com/)
 8. [Netlify](https://app.netlify.com/teams/dhimanparas20/overview)
