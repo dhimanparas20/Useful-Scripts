@@ -16,7 +16,7 @@
 14. 🔴 [Katacoda](https://www.katacoda.com/)   (Shutted Down)
 15. [stackblitz](https://stackblitz.com/)   (vs code editor)
 16. [codesandbox](https://codesandbox.io/dashboard/recent)   (40 hours permonth) (vs code editor)
-17. [Codeberg Pages](https://codeberg.page/)
+17. [Codeberg Pages](https://codeberg.page/)   (only for static pages/sites)
 18. [Coolify (PAID)](https://app.coolify.io/subscription/new)
 19. [Firebase](https://firebase.google.com/)
 20. [Project IDX](https://idx.google.com/)  (vs code editor)
