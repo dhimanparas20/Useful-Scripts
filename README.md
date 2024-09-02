@@ -25,6 +25,7 @@
 23. [Zeabur](https://zeabur.com/pricing)
 24. [Neon tech](https://neon.tech/pricing)
 25. [Cyclic sh](https://www.cyclic.sh/pricing/)   (Shutted Down)
+26. [Dokku](https://dokku.com/)
 
 
 ## Some tricks/Hacks/Methods I usually forget
