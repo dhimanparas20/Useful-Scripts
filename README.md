@@ -13,7 +13,7 @@
 11. [Gitpod](https://gitpod.io/)
 12. [Github Railways](https://railway.app/new/github)
 13. [Fly.io](https://fly.io/dashboard)  (Needs CC)
-14. [Katacoda](https://www.katacoda.com/)
+14. 🔴 [Katacoda](https://www.katacoda.com/)   (Shutted Down)
 15. [stackblitz](https://stackblitz.com/)
 16. [codesandbox](https://codesandbox.io/dashboard/recent)
 17. [Codeberg Pages](https://codeberg.page/)
