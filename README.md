@@ -8,7 +8,7 @@
 6. 🟢 [Render](https://dashboard.render.com/)
 7. [Vercel](https://vercel.com/)
 8. [Netlify](https://app.netlify.com/teams/dhimanparas20/overview)
-9. [Zeet.co](https://zeet.co/team-dhimanparas20/console/home)
+9. [Zeet.co](https://zeet.co/team-dhimanparas20/console/home)  (uses aws or gcp account in backend)
 10. [Replit](https://replit.com/~)
 11. [Gitpod](https://gitpod.io/)
 12. [Github Railways](https://railway.app/new/github)
