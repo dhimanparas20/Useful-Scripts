@@ -11,7 +11,7 @@
 9. 🔴 [Zeet.co](https://zeet.co/team-dhimanparas20/console/home)  (uses aws or gcp account in backend)
 10. [Replit](https://replit.com/~)  (vs code editor)
 11. [Gitpod](https://gitpod.io/)  (vs code editor) (50 hours permonth)
-12. [Github Railway](https://railway.app/new/github)  (5$ worth credits per month)
+12. [Github Railway](https://railway.app/new/github)  (5$ worth credits only free trial)
 13. [Fly.io](https://fly.io/dashboard)  (Needs CC)
 14. 🔴 [Katacoda](https://www.katacoda.com/)   (Shutted Down)
 15. [stackblitz](https://stackblitz.com/)   (vs code editor)
