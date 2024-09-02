@@ -23,7 +23,7 @@
 21. [Github CLI](https://cli.github.com/)  (vs code editor)
 22. [Infinity Free](https://infinityfree.net/)
 23. 🟢 [Zeabur](https://zeabur.com/pricing)
-24. [Neon tech](https://neon.tech/pricing)
+24. [Neon tech](https://neon.tech/pricing)  (neeeds ci/cd integrations)
 25. 🔴 [Cyclic sh](https://www.cyclic.sh/pricing/)   (Shutted Down)
 26. [Dokku](https://dokku.com/)
 
