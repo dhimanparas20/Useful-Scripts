@@ -15,7 +15,7 @@
 13. [Fly.io](https://fly.io/dashboard)  (Needs CC)
 14. 🔴 [Katacoda](https://www.katacoda.com/)   (Shutted Down)
 15. [stackblitz](https://stackblitz.com/)   (vs code editor)
-16. [codesandbox](https://codesandbox.io/dashboard/recent)   (40 hours permonth)
+16. [codesandbox](https://codesandbox.io/dashboard/recent)   (40 hours permonth) (vs code editor)
 17. [Codeberg Pages](https://codeberg.page/)
 18. [Coolify (PAID)](https://app.coolify.io/subscription/new)
 19. [Firebase](https://firebase.google.com/)
