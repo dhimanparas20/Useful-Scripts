@@ -82,6 +82,8 @@ sed -i 's/^ZSH_THEME="roborussel"/ZSH_THEME="bira"/' "$ZSHRC_FILE"
     echo 'alias ddownrmi="sudo docker compose down --rmi all"'
     echo 'alias dprune="sudo docker image prune -f"'
     echo 'alias dclean="sudo docker system prune -a"'
+    echo 'alias dcleanf="sudo docker system prune --all --volumes --force"'
+    echo 'alias dexec="sudo docker exec -it "'
     echo 'clear'
     echo 'neofetch'
     echo 'ls'
