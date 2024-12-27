@@ -1,0 +1,106 @@
+services:
+  django_app:
+    environment:
+      - TERM=xterm
+      - DJANGO_SETTINGS_MODULE=project_chat.settings
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_app
+    ports:  
+      - 5000
+    depends_on:
+      - db
+      - caddy
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped  # Add restart policy
+    networks:
+      - caddy
+
+  db:
+    image: postgres:latest
+    container_name: chatdb
+    restart: unless-stopped  # Add restart policy
+    environment:
+      POSTGRES_DB: chatdb
+      POSTGRES_USER: paras
+      POSTGRES_PASSWORD: 12345678
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - caddy  
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    environment:
+      - WEB_DOMAIN=localhost
+    ports:
+      - "80:80"       # HTTP (will be redirected to HTTPS)
+      - "443:443"     # HTTPS
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+    networks:
+      - caddy   
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_volume:/data
+    networks:
+      - caddy  
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A project_chat worker -l info
+    env_file:
+      - .env
+    volumes:
+      - ./:/app/code
+    depends_on:
+      - redis
+      - django_app
+    networks:
+      - caddy  
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A project_chat beat -l info
+    env_file:
+      - .env
+    volumes:
+      - ./:/app/code
+    depends_on:
+      - django_app
+      - redis
+    networks:
+      - caddy  
+
+volumes:
+  caddy_data:
+  caddy_config:
+  postgres_data:
+  redis_volume:
+
+# Networks for communication between services
+networks:
+  caddy:
+    driver: bridge
