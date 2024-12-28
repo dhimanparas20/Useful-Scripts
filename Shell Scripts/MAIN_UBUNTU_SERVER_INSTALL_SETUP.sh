@@ -3,7 +3,7 @@
 # The script must be run using sudo
 # The script also sets up some configurations wherever needed
 # HOW to run ?
-# wget https://raw.githubusercontent.com/dhimanparas20/Bash-Scripts/main/MAIN_UBUNTU_SERVER_INSTALL_SETUP.sh && chmod +x MAIN_UBUNTU_SERVER_INSTALL_SETUP.sh && time sudo ./MAIN_UBUNTU_SERVER_INSTALL_SETUP.sh
+# wget https://raw.githubusercontent.com/dhimanparas20/Useful-Scripts/refs/heads/main/Shell%20Scripts/MAIN_UBUNTU_SERVER_INSTALL_SETUP.sh && chmod +x MAIN_UBUNTU_SERVER_INSTALL_SETUP.sh && time sudo ./MAIN_UBUNTU_SERVER_INSTALL_SETUP.sh
 
 # Start
 clear
