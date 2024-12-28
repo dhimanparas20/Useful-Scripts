@@ -8,15 +8,13 @@ services:
       dockerfile: Dockerfile
     container_name: django_app
     ports:  
-      - 5000
+      - "5000:5000"
     depends_on:
       - db
       - caddy
       - redis
     env_file:
       - .env
-    volumes:
-      - .:/app
     restart: unless-stopped  # Add restart policy
     networks:
       - caddy
