@@ -7,6 +7,10 @@
 
 # Start
 clear
+echo "---------------------------------------------------------------------------------"
+echo "                            Installing Dependencies                              "
+echo "---------------------------------------------------------------------------------"
+sleep 1
 set -e
 
 # Check if the script is run with sudo
@@ -22,6 +26,11 @@ apt upgrade -y
 apt install git snapd python3 python3-pip ufw neofetch net-tools htop network-manager -y
 
 # Install LazyDocker
+clear
+echo "---------------------------------------------------------------------------------"
+echo "                            Installing LazyDocker                                "
+echo "---------------------------------------------------------------------------------"
+sleep 1
 curl -sSL https://raw.githubusercontent.com/upciti/wakemeops/main/assets/install_repository | sudo bash
 apt install lazydocker -y
 
@@ -30,7 +39,7 @@ clear
 echo "---------------------------------------------------------------------------------"
 echo "                                 Installing Docker                               "
 echo "---------------------------------------------------------------------------------"
-sleep 2
+sleep 1
 wget https://get.docker.com -O install-docker.sh
 chmod +x install-docker.sh
 ./install-docker.sh
@@ -41,17 +50,27 @@ clear
 echo "---------------------------------------------------------------------------------"
 echo "                                 Adding Git Configs                              "
 echo "---------------------------------------------------------------------------------"
-sleep 2
+sleep 1
 git config --global user.name "dhimanparas20"
 git config --global user.email "dhimanparas20@gmail.com"
 git config --global credential.helper cache
 git config --global credential.helper store
 
 # Install Zsh and OhMyZsh
+clear
+echo "---------------------------------------------------------------------------------"
+echo "                                 Installing ohmyzsh                              "
+echo "---------------------------------------------------------------------------------"
+sleep 1
 apt install zsh -y
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # Install Zsh plugins
+clear
+echo "---------------------------------------------------------------------------------"
+echo "                         Cloning ohmyzsh extentions                              "
+echo "---------------------------------------------------------------------------------"
+sleep 1
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
@@ -59,6 +78,11 @@ git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerl
 # Define the file path for .zshrc
 ZSHRC_FILE="$HOME/.zshrc"
 
+clear
+echo "---------------------------------------------------------------------------------"
+echo "                                   Editing .zshrc                                "
+echo "---------------------------------------------------------------------------------"
+sleep 1
 # Replace the line that starts with 'plugins=' to add new plugins
 sed -i 's/^plugins=(git)/plugins=(git sudo history encode64 copypath zsh-autosuggestions zsh-syntax-highlighting)/' "$ZSHRC_FILE"
 
