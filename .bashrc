@@ -11,3 +11,4 @@ alias activate="python3 -m venv venv && source venv/bin/activate"
 alias runserver="python3 manage.py runserver 0.0.0.0:5000  "
 alias migrate="python3 manage.py migrate"
 alias makemigrations="python3 manage.py makemigrations"
+alias server='sshpass -p "mypass" ssh ken@11.11.11.11'
