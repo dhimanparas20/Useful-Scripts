@@ -1,6 +1,7 @@
 # regestries location : /etc/containers/registries.conf
-# [registries.search]
-# registries = ["docker.io", "quay.io", "registry.access.redhat.com"]
+[registries.search]
+registries = ["docker.io", "quay.io", "registry.access.redhat.com"]
+systemctl enable podman-restart.service
 
 # Utility alias
 alias cls="clear"  # Clear the terminal screen
