@@ -8,10 +8,7 @@ alias dps="sudo docker ps -a"                      # List all containers (runnin
 alias dstart="sudo docker start"                   # Start a stopped container
 alias dstop="sudo docker stop"                     # Stop a running container
 alias drestart="sudo docker restart"               # Restart a container
-alias drestartall="sudo docker restart $(sudo docker ps -q)"  # Restart all running containers
-alias dstopall="sudo docker stop $(sudo docker ps -q)"        # Stop all running containers
 alias drm="sudo docker rm -f "                     # Forcefully remove a container
-alias drmall="sudo docker rm -f $(sudo docker ps -aq)"  # Remove all containers
 alias dlogs="sudo docker logs -f"                  # Tail logs of a container
 alias dexec="sudo docker exec -it "                # Execute a command in a running container
 alias dkill="sudo docker kill"                     # Kill a running container
@@ -38,7 +35,6 @@ alias dvcreate="sudo docker volume create"         # Create a new volume
 alias dvinspect="sudo docker volume inspect"       # Inspect a volume
 alias dvremove="sudo docker volume rm"             # Remove a volume
 alias dvprune="sudo docker volume prune -f"        # Remove all unused volumes
-alias dvolclear="sudo docker volume rm $(sudo docker volume ls -q)"  # Remove all volumes
 
 # ================================
 # Docker Network Management
