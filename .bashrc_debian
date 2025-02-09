@@ -1,0 +1,17 @@
+alias down="cd && cd Downloa*"
+alias desk="cd && cd Desktop"
+
+## Alias to all the servers
+alias server='sshpass -p "Luffykiid@2069" ssh ken@20.189.74.20'
+alias server2="ssh -i '/home/paras/Downloads/server_keys/key.pem' ubuntu@"
+alias server3="ssh -i '/home/paras/Downloads/server_keys/key.pem' ubuntu@"
+alias server4="ssh -i '/home/paras/Downloads/server_keys/key.pem' ubuntu@"
+
+export PATH="$PATH:$HOME/bin"
+alias py="python3"
+alias activate="python3 -m venv venv && source venv/bin/activate"
+alias runserver="python3 manage.py runserver 0.0.0.0:5000  "
+alias migrate="python3 manage.py migrate"
+alias makemigrations="python3 manage.py makemigrations"
+clear
+echo "Hello Paras"
