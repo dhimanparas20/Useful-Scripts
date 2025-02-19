@@ -3,9 +3,14 @@ alias desk="cd && cd Desktop"
 
 ## Alias to all the servers
 alias server='sshpass -p "Luffykiid@2069" ssh ken@20.189.74.20'
-alias server2="ssh -i '/home/paras/Downloads/server_keys/key.pem' ubuntu@"
-alias server3="ssh -i '/home/paras/Downloads/server_keys/key.pem' ubuntu@"
-alias server4="ssh -i '/home/paras/Downloads/server_keys/key.pem' ubuntu@"
+alias server2="ssh -i '/home/paras/server_keys/key.pem' ubuntu@"
+alias server3="ssh -i '/home/paras/server_keys/key.pem' ubuntu@"
+alias server4="ssh -i '/home/paras/server_keys/key.pem' ubuntu@"
+
+# Git Alias
+alias gadd="git add ."
+alias gcommit="git commit -m "
+alias gpush="git push"
 
 export PATH="$PATH:$HOME/bin"
 alias py="python3"
