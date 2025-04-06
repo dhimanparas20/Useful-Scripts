@@ -1,11 +1,14 @@
+#Normal Aliases
 alias down="cd && cd Downloa*"
 alias desk="cd && cd Desktop"
+alias proj="cd && cd Desktop && cd Projects"
 
 ## Alias to all the servers
-alias server='sshpass -p "Luffykiid@2069" ssh ken@20.189.74.20'
-alias server2="ssh -i '/home/paras/server_keys/key.pem' ubuntu@"
-alias server3="ssh -i '/home/paras/server_keys/key.pem' ubuntu@"
-alias server4="ssh -i '/home/paras/server_keys/key.pem' ubuntu@"
+#alias server='sshpass -p "" ssh ken@20.189.74.20'
+alias server="ssh -i '/home/paras/server_keys/automation_key.pem' ubuntu@"
+alias server2="ssh -i '/home/paras/server_keys/research_key.pem' ubuntu@"
+alias server3="ssh -i '/home/paras/server_keys/chat_key.pem' ubuntu@"
+alias server4="ssh -i '/home/paras/server_keys/stock_key.pem' ubuntu@"
 
 # Git Alias
 alias gadd="git add ."
