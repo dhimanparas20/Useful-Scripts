@@ -5,6 +5,7 @@ alias proj="cd && cd Desktop && cd Projects"
 
 ## Alias to all the servers
 #alias server='sshpass -p "" ssh ken@20.189.74.20'
+alias raspi='sshpass -p "1212" ssh mst@192.168.1.102'
 alias server="ssh -i '/home/paras/server_keys/automation_key.pem' ubuntu@"
 alias server2="ssh -i '/home/paras/server_keys/research_key.pem' ubuntu@"
 alias server3="ssh -i '/home/paras/server_keys/chat_key.pem' ubuntu@"
