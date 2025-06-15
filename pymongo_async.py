@@ -246,7 +246,7 @@ class AsyncMongoDB:
         """
         Close the MongoDB client connection.
         """
-        self.client.close()
+        await self.client.close()
 
     async def get_by_id(self, _id: Union[str, ObjectId]) -> Optional[Dict[str, Any]]:
         """
