@@ -149,10 +149,11 @@ class MongoDB:
         projection = None if show_id else {"_id": 0}
         cursor = self.collection.find(filter or {}, projection, *args, **kwargs)
         result = []
-        for item in cursor:
-            if show_id and "_id" in item:
-                item["_id"] = str(item["_id"])
-            result.append(item)
+        if show_id:
+            # Convert _id to string if present
+            result = list(map(lambda item: {**item, "_id": str(item["_id"])} if "_id" in item else item, cursor))
+        else:
+            result = list(cursor)
         return result
 
     def count(self, filter: Optional[Dict[str, Any]] = None, *args, **kwargs) -> int:
