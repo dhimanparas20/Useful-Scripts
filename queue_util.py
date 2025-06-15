@@ -1,5 +1,6 @@
 import pika
 from typing import Callable, Optional, Any
+from time import sleep
 
 class RabbitMQQueue:
     """
@@ -117,6 +118,18 @@ class RabbitMQQueue:
         q = self.channel.queue_declare(queue=self.queue_name, durable=self.durable, passive=True)
         return q.method.message_count
 
+    def get_all_messages(self, auto_ack: bool = True) -> list:
+        """
+        Get all messages from the queue as a list (destructive: removes them from the queue).
+        """
+        messages = []
+        while True:
+            msg = self.get(auto_ack=auto_ack)
+            if msg is None:
+                break
+            messages.append(msg)
+        return messages
+
 # --- Example Usage ---
 
 if __name__ == "__main__":
@@ -133,14 +146,17 @@ if __name__ == "__main__":
     )
 
     # Producer example
+    queue.purge()
     for i in range(3):
-        queue.produce(f"Hello from class-based producer! Message {i}")
-    print(f"Queue size after produce: {queue.queue_size()}")
+        queue.produce(f"Message {i}")
+    sleep(1)
+    print("Queue size after produce:", queue.queue_size())  # Should show 3 if no consumer is running
     queue.close()
 
     # Consumer example
     def process_message(msg):
         print(f"Consumed: {msg}")
+        # exit() if queue.queue_size()==0 else None
 
     queue = RabbitMQQueue(
         queue_name="test_queue",
