@@ -6,18 +6,36 @@ class RabbitMQQueue:
     Production-ready RabbitMQ queue handler for CloudAMQP or any AMQP broker.
     """
 
-    def __init__(self, amqp_url: str, queue_name: str, durable: bool = True) -> None:
+    def __init__(
+        self,
+        queue_name: str,
+        username: str,
+        password: str,
+        host: str,
+        port: int = 5672,
+        vhost: str = '/',
+        durable: bool = True,
+        use_ssl: bool = True
+    ) -> None:
         """
         Initialize the queue handler and connect to the broker.
 
         Args:
-            amqp_url (str): AMQP connection URL.
             queue_name (str): Name of the queue.
+            username (str): RabbitMQ username.
+            password (str): RabbitMQ password.
+            host (str): RabbitMQ host.
+            port (int): RabbitMQ port (5672 or 5671 for TLS).
+            vhost (str): RabbitMQ virtual host.
             durable (bool): Whether the queue should survive broker restarts.
+            use_ssl (bool): Use SSL/TLS (amqps) or not (amqp).
         """
-        self.amqp_url = amqp_url
         self.queue_name = queue_name
         self.durable = durable
+        protocol = "amqps" if use_ssl else "amqp"
+        self.amqp_url = (
+            f"{protocol}://{username}:{password}@{host}:{port}/{vhost.lstrip('/')}"
+        )
         self.connection = None
         self.channel = None
         self._connect()
@@ -102,12 +120,20 @@ class RabbitMQQueue:
 # --- Example Usage ---
 
 if __name__ == "__main__":
-    AMQP_URL = "amqps://hxssuxdc:YOUR_PASSWORD@puffin.rmq2.cloudamqp.com/hxssuxdc"
-    QUEUE_NAME = "test_queue"
+    # Fill in your actual credentials here
+    queue = RabbitMQQueue(
+        queue_name="test_queue",
+        username="hxssuxdc",
+        password="7f5Hn77d84IiiOFVQeKE4ZfHYKRpYBmj",
+        host="puffin.rmq2.cloudamqp.com",
+        port=5671,  # Use 5671 for TLS, 5672 for non-TLS
+        vhost="hxssuxdc",
+        durable=True,
+        use_ssl=True
+    )
 
     # Producer example
-    queue = RabbitMQQueue(AMQP_URL, QUEUE_NAME)
-    for i in range(5):
+    for i in range(3):
         queue.produce(f"Hello from class-based producer! Message {i}")
     print(f"Queue size after produce: {queue.queue_size()}")
     queue.close()
@@ -116,6 +142,15 @@ if __name__ == "__main__":
     def process_message(msg):
         print(f"Consumed: {msg}")
 
-    queue = RabbitMQQueue(AMQP_URL, QUEUE_NAME)
+    queue = RabbitMQQueue(
+        queue_name="test_queue",
+        username="hxssuxdc",
+        password="7f5Hn77d84IiiOFVQeKE4ZfHYKRpYBmj",
+        host="puffin.rmq2.cloudamqp.com",
+        port=5671,
+        vhost="hxssuxdc",
+        durable=True,
+        use_ssl=True
+    )
     queue.consume(process_message)  # This will block and consume messages
     queue.close()
