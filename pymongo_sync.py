@@ -3,6 +3,7 @@ MongoDB Utility Module
 
 Production-ready MongoDB utility class using PyMongo.
 Requirements: pymongo==4.6.0, passlib
+pip3 install pymongo, bson, passlib
 """
 
 from typing import Any, Dict, List, Optional, Union
