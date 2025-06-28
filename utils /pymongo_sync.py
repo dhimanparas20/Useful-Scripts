@@ -3,7 +3,7 @@ MongoDB Utility Module
 
 Production-ready MongoDB utility class using PyMongo.
 Requirements: pymongo==4.6.0, passlib
-pip3 install pymongo, bson, passlib
+pip3 install pymongo, passlib
 """
 
 from typing import Any, Dict, List, Optional, Union
@@ -13,7 +13,7 @@ import random
 import string
 from passlib.hash import pbkdf2_sha256
 
-DEFAULT_STRING = "mongodb://mongo:27017/"
+DEFAULT_STRING = "mongodb://localhost:27017/"
 
 class MongoDB:
     """
@@ -123,6 +123,26 @@ class MongoDB:
         result = self.collection.insert_one(data, *args, **kwargs)
         return str(result.inserted_id)
 
+    def insert_unique(self, filter: Dict[str, Any], data: Dict[str, Any]) -> bool:
+        """
+        Insert a document only if no document matches the unique filter.
+
+        Args:
+            filter (Dict[str, Any]): Query filter to check uniqueness.
+            data (Dict[str, Any]): Document to insert.
+
+        Returns:
+            bool: True if inserted, False if already exists.
+
+        Raises:
+            Exception: If document already exists.
+        """
+        if self.count(filter) > 0:
+            # Already exists
+            return False
+        self.insert(data)
+        return True
+
     def insert_many(self, data: List[Dict[str, Any]], *args, **kwargs) -> List[str]:
         """
         Insert multiple documents.
@@ -136,9 +156,10 @@ class MongoDB:
         result = self.collection.insert_many(data, *args, **kwargs)
         return [str(_id) for _id in result.inserted_ids]
 
-    def fetch(self, filter: Optional[Dict[str, Any]] = None, show_id: bool = False, *args, **kwargs) -> List[Dict[str, Any]]:
+    def filter(self, filter: Optional[Dict[str, Any]] = None, show_id: bool = False, *args, **kwargs) -> List[
+        Dict[str, Any]]:
         """
-        Fetch documents from the collection.
+        Filter documents from the collection.
 
         Args:
             filter (Optional[Dict[str, Any]]): Query filter.
@@ -151,11 +172,34 @@ class MongoDB:
         cursor = self.collection.find(filter or {}, projection, *args, **kwargs)
         result = []
         if show_id:
-            # Convert _id to string if present
-            result = list(map(lambda item: {**item, "_id": str(item["_id"])} if "_id" in item else item, cursor))
+            result = [{**item, "_id": str(item["_id"])} if "_id" in item else item for item in cursor]
         else:
             result = list(cursor)
         return result
+
+    def get(self, filter: Optional[Dict[str, Any]] = None, show_id: bool = False, *args, **kwargs) -> Optional[
+        Dict[str, Any]]:
+        """
+        Get a single document matching the filter.
+
+        Args:
+            filter (Optional[Dict[str, Any]]): Query filter.
+            show_id (bool): Whether to include '_id' in result.
+
+        Returns:
+            Optional[Dict[str, Any]]: The first matching document, or None if not found.
+
+        Raises:
+            Exception: If an error occurs during retrieval.
+        """
+        projection = None if show_id else {"_id": 0}
+        try:
+            doc = self.collection.find_one(filter or {}, projection, *args, **kwargs)
+            if doc and show_id and "_id" in doc:
+                doc["_id"] = str(doc["_id"])
+            return doc
+        except Exception as e:
+            raise Exception(f"Error in get: {e}")
 
     def count(self, filter: Optional[Dict[str, Any]] = None, *args, **kwargs) -> int:
         """
@@ -260,6 +304,61 @@ class MongoDB:
         if isinstance(_id, str):
             _id = ObjectId(_id)
         return self.collection.find_one({"_id": _id})
+
+    def update_or_create(self, filter: Dict[str, Any], data: Dict[str, Any]) -> (Dict[str, Any], bool):
+        """
+        Update a document matching the filter, or create it if it doesn't exist.
+
+        Args:
+            filter (Dict[str, Any]): Query filter.
+            data (Dict[str, Any]): Data to update or insert.
+
+        Returns:
+            Tuple[Dict[str, Any], bool]: (The document, created True if inserted, False if updated)
+        """
+        try:
+            result = self.collection.update_one(filter, {"$set": data}, upsert=True)
+            if result.upserted_id is not None:
+                # Created new
+                doc = self.collection.find_one({"_id": result.upserted_id})
+                if doc:
+                    doc["_id"] = str(doc["_id"])
+                return doc, True
+            else:
+                # Updated existing
+                doc = self.collection.find_one(filter)
+                if doc:
+                    doc["_id"] = str(doc["_id"])
+                return doc, False
+        except Exception as e:
+            raise Exception(f"Error in update_or_create: {e}")
+
+    def get_or_create(self, filter: Dict[str, Any], data: Optional[Dict[str, Any]] = None) -> (Dict[str, Any], bool):
+        """
+        Fetch a document matching the filter, or create it if it doesn't exist.
+
+        Args:
+            filter (Dict[str, Any]): Query filter.
+            data (Optional[Dict[str, Any]]): Data to insert if not found.
+
+        Returns:
+            Tuple[Dict[str, Any], bool]: (The document, created True if inserted, False if fetched)
+        """
+        try:
+            doc = self.collection.find_one(filter)
+            if doc:
+                doc["_id"] = str(doc["_id"])
+                return doc, False
+            # Merge filter and data for creation
+            new_doc = {**filter}
+            if data:
+                new_doc.update(data)
+            inserted_id = self.collection.insert_one(new_doc).inserted_id
+            new_doc["_id"] = str(inserted_id)
+            return new_doc, True
+        except Exception as e:
+            raise Exception(f"Error in fetch_or_create: {e}")
+
 
 # Usage Example:
 # mydb = MongoDB("AutomationBOT", "bot
