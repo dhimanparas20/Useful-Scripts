@@ -6,7 +6,7 @@ Requirements: pymongo==4.6.0, passlib
 pip3 install pymongo, passlib
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union,Tuple
 from bson import ObjectId
 import pymongo
 import random
@@ -213,21 +213,30 @@ class MongoDB:
         """
         return self.collection.count_documents(filter or {}, *args, **kwargs)
 
-    def update(self, filter: Dict[str, Any], update_data: Dict[str, Any], *args, **kwargs) -> int:
+    def update(self, filter: Dict[str, Any], update_data: Dict[str, Any],multiple:bool = True,upsert:bool = False, *args, **kwargs) -> Tuple[int ,Union[int,List[Dict[str, Any]], Dict[str, Any]]]:
         """
-        Update documents matching a filter.
+        Update single or multiple document's matching a filter and return the updated document's.
+        If the document is not found and upsert is True, a new document is inserted.
 
         Args:
             filter (Dict[str, Any]): Query filter.
+            multiple (bool): Whether to update multiple documents.
             update_data (Dict[str, Any]): Data to update.
+            upsert (bool): Whether to insert a new document if no document matches the filter.
 
         Returns:
-            int: Number of documents modified.
+            Tuple[int, List[Dict[str, Any]]]: Number of documents modified and the updated documents.
         """
         if "_id" in filter and isinstance(filter["_id"], str):
             filter["_id"] = ObjectId(filter["_id"])
-        result = self.collection.update_many(filter, {"$set": update_data}, *args, **kwargs)
-        return result.modified_count
+        if multiple:
+            result = self.collection.update_many(filter, {"$set": update_data}, *args, **kwargs)
+            updated_doc = list(self.collection.find(filter))
+        else:
+            result = self.collection.update_one(filter, {"$set": update_data},upsert=upsert, *args, **kwargs)
+            updated_doc = self.get(filter)
+
+        return result.modified_count,updated_doc
 
     def delete(self, filter: Dict[str, Any], *args, **kwargs) -> int:
         """
