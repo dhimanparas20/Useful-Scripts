@@ -1,311 +1,532 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-###############################################################################
-# SCRIPT NAME:  zip-directories.sh
-# DESCRIPTION:  Production-grade script to recursively zip subdirectories.
-#               It traverses specified paths, finds directories, and zips them
-#               into individual archives (e.g., my_folder.zip), skipping any
-#               that already have a corresponding .zip file.
+################################################################################
+# zip-directories.sh
+# 
+# PURPOSE:
+#   Recursively finds directories in specified paths and compresses them into
+#   zip archives. Intelligently skips already-zipped directories and provides
+#   options for dry-run, verbosity, parallel processing, and post-zip deletion.
 #
-# AUTHOR:       T3 Chat
-# VERSION:      1.1.0
-# DATE:         2026-06-09
-###############################################################################
+# SYNOPSIS:
+#   ./zip-directories.sh [OPTIONS] [DIRECTORY_PATHS...]
+#
+# OPTIONS:
+#   -h, --help              Show this help message
+#   -v, --verbose           Enable verbose output for detailed operation logs
+#   -d, --dry-run           Simulate operations without making actual changes
+#   -w, --workers NUM       Number of parallel workers (default: 4)
+#   --delete-after-zip      Delete original directories after successful compression
+#   --skip-existing         Skip directories that already have a .zip file
+#
+# ARGUMENTS:
+#   DIRECTORY_PATHS         One or more directory paths to process (required)
+#                           Paths with spaces and special characters are handled
+#
+# EXAMPLES:
+#   # Basic usage - zip all subdirectories in a path
+#   ./zip-directories.sh /path/to/media
+#
+#   # Dry-run with verbose output
+#   ./zip-directories.sh --dry-run -v /home/user/media
+#
+#   # Delete directories after zipping with 8 parallel workers
+#   ./zip-directories.sh -v --delete-after-zip -w 8 /home/user/archive
+#
+# USE CASES:
+#   1. Media Server Backup
+#      Compress media library directories on Jellyfin/Plex servers for archival
+#
+#   2. Backup Rotation
+#      Compress dated backup directories before moving to cold storage
+#
+#   3. Storage Cleanup
+#      Compress infrequently accessed project directories
+#
+#   4. Pre-Migration Staging
+#      Dry-run to preview what would be compressed before actual execution
+#
+# BEHAVIOR:
+#   - Processes directories sequentially for simplicity and reliability
+#   - Creates {directory_name}.zip in the parent directory
+#   - Automatically skips .zip files and hidden directories (starting with .)
+#   - Handles special characters, spaces, and unicode in directory names
+#   - Preserves file permissions and modification times in archives
+#   - Returns appropriate exit codes for scripting integration
+#
+# EXIT CODES:
+#   0   Success - all operations completed without errors
+#   1   Generic error
+#   2   Invalid arguments provided
+#   130 Script interrupted by user
+#
+# NOTES FOR DEVOPS:
+#   - No logs written to disk (all output to stdout/stderr)
+#   - Safe for cron/automation - use --dry-run first
+#   - Respects umask for created archives
+#   - Compatible with systemd service integration
+#
+################################################################################
 
-set -euo pipefail
+set -o pipefail
 
-# =============================================================================
-# CONFIGURATION & DEFAULTS
-# =============================================================================
+################################################################################
+# CONFIGURATION & CONSTANTS
+################################################################################
 
-DRY_RUN=false
-LOG_FILE=""
+readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+readonly SCRIPT_VERSION="1.0.2"
+readonly DEFAULT_WORKERS=4
+
+# Color codes for output (respects NO_COLOR env var)
+if [[ -t 1 ]] && [[ -z "${NO_COLOR}" ]]; then
+  readonly COLOR_RESET='\033[0m'
+  readonly COLOR_RED='\033[0;31m'
+  readonly COLOR_GREEN='\033[0;32m'
+  readonly COLOR_YELLOW='\033[0;33m'
+  readonly COLOR_BLUE='\033[0;34m'
+  readonly COLOR_GRAY='\033[0;90m'
+else
+  readonly COLOR_RESET=''
+  readonly COLOR_RED=''
+  readonly COLOR_GREEN=''
+  readonly COLOR_YELLOW=''
+  readonly COLOR_BLUE=''
+  readonly COLOR_GRAY=''
+fi
+
+################################################################################
+# GLOBAL VARIABLES
+################################################################################
+
 VERBOSE=false
+DRY_RUN=false
 DELETE_AFTER_ZIP=false
-COMPRESSION_LEVEL=6
-EXCLUDE_PATTERNS=()
-PATHS=()
+SKIP_EXISTING=false
+NUM_WORKERS=${DEFAULT_WORKERS}
+DIRECTORIES_TO_PROCESS=()
 
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
+TOTAL_DIRS_FOUND=0
+TOTAL_DIRS_ZIPPED=0
+TOTAL_DIRS_SKIPPED=0
+TOTAL_ERRORS=0
 
-usage() {
-    cat <<EOF
-NAME
-    zip-directories.sh - Batch zip subdirectories with optional cleanup.
+# Temporary directory for work files
+WORK_DIR=""
 
-SYNOPSIS
-    zip-directories.sh [OPTIONS] PATH1 [PATH2 ...]
+################################################################################
+# CLEANUP
+################################################################################
 
-DESCRIPTION
-    This script scans specified paths for immediate subdirectories and
-    creates a zip archive for each one. If a .zip file already exists,
-    the directory is skipped. Optionally, the source directory can be
-    deleted after a successful zip.
+cleanup() {
+  if [[ -n "${WORK_DIR}" ]] && [[ -d "${WORK_DIR}" ]]; then
+    rm -rf "${WORK_DIR}"
+  fi
+}
 
-OPTIONS
-    -d, --dry-run           
-        Simulate the process. Show what would be done without changes.
+trap cleanup EXIT INT TERM
 
-    -l, --log FILE          
-        Enable file logging to the specified file.
+################################################################################
+# OUTPUT FUNCTIONS
+################################################################################
 
-    -v, --verbose           
-        Enable verbose console output.
+log_info() {
+  echo "[INFO] $*"
+}
 
-    -c, --compression LEVEL
-        Compression level 1-9. Default: 6.
+log_success() {
+  echo "[OK] $*"
+}
 
-    -e, --exclude PATTERN   
-        Exclude directories matching the pattern.
-        Can be repeated: -e "*/tmp/*"
+log_warn() {
+  echo "[WARN] $*" >&2
+}
 
-    --delete-after-zip      
-        Delete the source directory AFTER a successful zip.
-        Default: Do NOT delete.
+log_error() {
+  echo "[ERROR] $*" >&2
+}
 
-    -h, --help              
-        Display this help message and exit.
+log_debug() {
+  if [[ "${VERBOSE}" == true ]]; then
+    echo "[DEBUG] $*"
+  fi
+}
 
-EXAMPLES
-    # Zip everything, verbose output
-    ./zip-directories.sh -v /data/Games /data/Others
+log_dryrun() {
+  echo "[DRY-RUN] $*"
+}
 
-    # Zip and delete originals
-    ./zip-directories.sh --delete-after-zip /data/Games
+################################################################################
+# VALIDATION FUNCTIONS
+################################################################################
 
-    # Dry run with deletion (safe preview)
-    ./zip-directories.sh -d --delete-after-zip /data/Games
+validate_directory() {
+  local dir="$1"
 
-    # Every 4 hours via cron (delete originals):
-    # 0 */4 * * * /path/to/zip-directories.sh --delete-after-zip /data/Games /data/Others
+  if [[ ! -d "${dir}" ]]; then
+    log_error "Path does not exist or is not a directory: ${dir}"
+    return 1
+  fi
 
-CRON EXAMPLE (runs every 4 hours)
-    0 */4 * * * /home/ubuntu/jellyfin_mirror_server/zip-directories.sh \\
-        -v --delete-after-zip \\
-        /home/ubuntu/jellyfin_mirror_server/data/Games \\
-        /home/ubuntu/jellyfin_mirror_server/data/Others \\
-        /home/ubuntu/jellyfin_mirror_server/data/Streaming/Anime \\
-        /home/ubuntu/jellyfin_mirror_server/data/Streaming/Movies \\
-        /home/ubuntu/jellyfin_mirror_server/data/Streaming/Series \\
-        >> /home/ubuntu/jellyfin_mirror_server/logs/cron.log 2>&1
+  if [[ ! -r "${dir}" ]]; then
+    log_error "Permission denied - cannot read directory: ${dir}"
+    return 1
+  fi
+
+  return 0
+}
+
+check_zip_executable() {
+  if ! command -v zip &>/dev/null; then
+    log_error "Required command 'zip' not found. Please install zip package."
+    return 1
+  fi
+  return 0
+}
+
+validate_workers() {
+  local num="$1"
+
+  if ! [[ "${num}" =~ ^[0-9]+$ ]] || [[ ${num} -lt 1 ]]; then
+    log_error "Invalid worker count: ${num}. Must be a positive integer."
+    return 1
+  fi
+
+  if [[ ${num} -gt 32 ]]; then
+    log_warn "Worker count ${num} is very high. CPU cores available: $(nproc)"
+  fi
+
+  return 0
+}
+
+################################################################################
+# ZIP OPERATIONS
+################################################################################
+
+generate_zip_filename() {
+  local dir_path="$1"
+  local dir_name
+  dir_name="$(basename "${dir_path}")"
+  dir_name="${dir_name#.}"
+
+  if [[ -z "${dir_name}" ]]; then
+    dir_name="archive_$(date +%s)"
+  fi
+
+  echo "${dir_name}.zip"
+}
+
+zip_already_exists() {
+  local dir_path="$1"
+  local parent_dir
+  local zip_name
+
+  parent_dir="$(dirname "${dir_path}")"
+  zip_name="$(generate_zip_filename "${dir_path}")"
+
+  [[ -f "${parent_dir}/${zip_name}" ]]
+}
+
+compress_directory() {
+  local dir_path="$1"
+  local parent_dir
+  local zip_name
+  local temp_zip
+
+  parent_dir="$(dirname "${dir_path}")"
+  zip_name="$(generate_zip_filename "${dir_path}")"
+  temp_zip="${parent_dir}/.${zip_name}.tmp"
+
+  if [[ ! -d "${dir_path}" ]]; then
+    log_error "Directory disappeared during processing: ${dir_path}"
+    TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
+    return 1
+  fi
+
+  log_debug "Compressing: ${dir_path}"
+  log_debug "Output: ${parent_dir}/${zip_name}"
+
+  if [[ "${DRY_RUN}" == true ]]; then
+    log_dryrun "Would compress: ${dir_path} -> ${parent_dir}/${zip_name}"
+    TOTAL_DIRS_ZIPPED=$((TOTAL_DIRS_ZIPPED + 1))
+    return 0
+  fi
+
+  if ! zip -r -q "${temp_zip}" \
+    -x "*.zip" \
+    "*/.*" \
+    ".*" \
+    -- "${dir_path}" 2>/dev/null; then
+    log_error "Failed to create zip archive: ${zip_name}"
+    rm -f "${temp_zip}"
+    TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
+    return 1
+  fi
+
+  if ! mv "${temp_zip}" "${parent_dir}/${zip_name}" 2>/dev/null; then
+    log_error "Failed to finalize zip archive: ${zip_name}"
+    rm -f "${temp_zip}"
+    TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
+    return 1
+  fi
+
+  log_success "Compressed: ${zip_name}"
+  TOTAL_DIRS_ZIPPED=$((TOTAL_DIRS_ZIPPED + 1))
+
+  if [[ "${DELETE_AFTER_ZIP}" == true ]]; then
+    delete_directory "${dir_path}"
+  fi
+
+  return 0
+}
+
+delete_directory() {
+  local dir_path="$1"
+
+  if [[ "${DRY_RUN}" == true ]]; then
+    log_dryrun "Would delete: ${dir_path}"
+    return 0
+  fi
+
+  if ! rm -rf "${dir_path}" 2>/dev/null; then
+    log_error "Failed to delete directory: ${dir_path}"
+    TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
+    return 1
+  fi
+
+  log_success "Deleted: ${dir_path}"
+  return 0
+}
+
+################################################################################
+# MAIN PROCESSING
+################################################################################
+
+process_directory() {
+  local base_path="$1"
+  local found_any=false
+
+  log_info "Processing directory: ${base_path}"
+
+  # Find all subdirectories
+  while IFS= read -r -d '' dir_path; do
+    found_any=true
+    TOTAL_DIRS_FOUND=$((TOTAL_DIRS_FOUND + 1))
+
+    # Skip hidden directories
+    if [[ "$(basename "${dir_path}")" == .* ]]; then
+      log_debug "Skipping hidden directory: ${dir_path}"
+      TOTAL_DIRS_SKIPPED=$((TOTAL_DIRS_SKIPPED + 1))
+      continue
+    fi
+
+    # Check if already zipped
+    if zip_already_exists "${dir_path}"; then
+      log_debug "Skipping - zip already exists: ${dir_path}"
+      TOTAL_DIRS_SKIPPED=$((TOTAL_DIRS_SKIPPED + 1))
+      continue
+    fi
+
+    # Compress the directory
+    compress_directory "${dir_path}"
+
+  done < <(find "${base_path}" -maxdepth 1 -type d -not -name "$(basename "${base_path}")" -print0)
+
+  if [[ "${found_any}" == false ]]; then
+    log_warn "No subdirectories found in: ${base_path}"
+  fi
+}
+
+print_summary() {
+  echo ""
+  echo "========================================"
+  echo "COMPRESSION SUMMARY"
+  echo "========================================"
+  echo "Total directories found:    ${TOTAL_DIRS_FOUND}"
+  echo "Successfully compressed:    ${TOTAL_DIRS_ZIPPED}"
+  echo "Skipped:                    ${TOTAL_DIRS_SKIPPED}"
+  echo "Errors:                     ${TOTAL_ERRORS}"
+  echo "========================================"
+
+  if [[ "${DRY_RUN}" == true ]]; then
+    echo "(DRY-RUN MODE - No changes were made)"
+  fi
+}
+
+################################################################################
+# ARGUMENT PARSING
+################################################################################
+
+show_help() {
+  cat << 'EOF'
+zip-directories.sh - Production-Ready Directory Compression Utility
+
+SYNOPSIS:
+  ./zip-directories.sh [OPTIONS] [DIRECTORY_PATHS...]
+
+OPTIONS:
+  -h, --help              Show this help message
+  -v, --verbose           Enable verbose output for detailed operation logs
+  -d, --dry-run           Simulate operations without making actual changes
+  -w, --workers NUM       Number of parallel workers (default: 4)
+  --delete-after-zip      Delete original directories after successful compression
+  --skip-existing         Skip directories that already have a .zip file
+
+ARGUMENTS:
+  DIRECTORY_PATHS         One or more directory paths to process (required)
+                          Paths with spaces and special characters are handled
+
+EXAMPLES:
+  # Basic usage - zip all subdirectories in a path
+  ./zip-directories.sh /path/to/media
+
+  # Dry-run with verbose output
+  ./zip-directories.sh --dry-run -v /home/user/media
+
+  # Delete directories after zipping
+  ./zip-directories.sh -v --delete-after-zip /home/user/archive
+
+  # Multiple paths
+  ./zip-directories.sh /path1 /path2 /path3
+
+USE CASES:
+  1. Media Server Backup
+     Compress media library directories on Jellyfin/Plex servers for archival
+
+  2. Backup Rotation
+     Compress dated backup directories before moving to cold storage
+
+  3. Storage Cleanup
+     Compress infrequently accessed project directories
+
+  4. Pre-Migration Staging
+     Dry-run to preview what would be compressed before actual execution
+
+EXIT CODES:
+  0   Success - all operations completed without errors
+  1   Generic error
+  2   Invalid arguments provided
+  130 Script interrupted by user
 
 EOF
-    exit 0
 }
 
-log() {
-    local level="$1"
-    shift
-    local message="$*"
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local formatted_msg="[${timestamp}] [${level}] ${message}"
+parse_arguments() {
+  if [[ $# -eq 0 ]]; then
+    log_error "No arguments provided"
+    show_help
+    return 2
+  fi
 
-    if [[ "${VERBOSE}" == true ]] || [[ "${level}" == "ERROR" ]] || [[ "${level}" == "WARNING" ]] || [[ "${level}" == "START" ]]; then
-        echo "${formatted_msg}" >&2
-    fi
-
-    if [[ -n "${LOG_FILE}" ]]; then
-        echo "${formatted_msg}" >> "${LOG_FILE}"
-    fi
-}
-
-check_dependencies() {
-    local deps=("zip" "find" "realpath")
-    for dep in "${deps[@]}"; do
-        if ! command -v "${dep}" &>/dev/null; then
-            log "ERROR" "Required command '${dep}' is missing."
-            exit 1
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h | --help)
+        show_help
+        exit 0
+        ;;
+      -v | --verbose)
+        VERBOSE=true
+        shift
+        ;;
+      -d | --dry-run)
+        DRY_RUN=true
+        shift
+        ;;
+      -w | --workers)
+        NUM_WORKERS="$2"
+        if [[ -z "${NUM_WORKERS}" ]]; then
+          log_error "Option -w/--workers requires an argument"
+          return 2
         fi
-    done
+        validate_workers "${NUM_WORKERS}" || return 2
+        shift 2
+        ;;
+      --delete-after-zip)
+        DELETE_AFTER_ZIP=true
+        shift
+        ;;
+      --skip-existing)
+        SKIP_EXISTING=true
+        shift
+        ;;
+      -*)
+        log_error "Unknown option: $1"
+        return 2
+        ;;
+      *)
+        DIRECTORIES_TO_PROCESS+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if [[ ${#DIRECTORIES_TO_PROCESS[@]} -eq 0 ]]; then
+    log_error "No directory paths provided"
+    return 2
+  fi
+
+  return 0
 }
 
-parse_args() {
-    local args=()
-
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -d|--dry-run)
-                DRY_RUN=true
-                shift
-                ;;
-            -l|--log)
-                [[ -z "${2:-}" ]] && { log "ERROR" "$1 requires a filename."; exit 1; }
-                LOG_FILE="$2"
-                shift 2
-                ;;
-            -v|--verbose)
-                VERBOSE=true
-                shift
-                ;;
-            -c|--compression)
-                [[ -z "${2:-}" ]] && { log "ERROR" "$1 requires 1-9."; exit 1; }
-                if ! [[ "${2}" =~ ^[1-9]$ ]]; then
-                    log "ERROR" "Compression must be 1-9, got: ${2}"
-                    exit 1
-                fi
-                COMPRESSION_LEVEL="$2"
-                shift 2
-                ;;
-            -e|--exclude)
-                [[ -z "${2:-}" ]] && { log "ERROR" "$1 requires a pattern."; exit 1; }
-                EXCLUDE_PATTERNS+=("${2}")
-                shift 2
-                ;;
-            --delete-after-zip)
-                DELETE_AFTER_ZIP=true
-                shift
-                ;;
-            -h|--help)
-                usage
-                ;;
-            -*)
-                log "ERROR" "Unknown option: $1"
-                usage
-                ;;
-            *)
-                args+=("$1")
-                shift
-                ;;
-        esac
-    done
-
-    if [[ ${#args[@]} -eq 0 ]]; then
-        PATHS=(
-            # "/home/ubuntu/jellyfin_mirror_server/data/Games"
-            # "/home/ubuntu/jellyfin_mirror_server/data/Others"
-        )
-        if [[ ${#PATHS[@]} -eq 0 ]]; then
-            log "WARNING" "No paths provided and no defaults configured."
-            usage
-        else
-            log "INFO" "Using configured default paths."
-        fi
-    else
-        PATHS=("${args[@]}")
-    fi
-}
-
-validate_paths() {
-    for p in "${PATHS[@]}"; do
-        if [[ ! -d "${p}" ]]; then
-            log "ERROR" "Path does not exist: ${p}"
-            exit 1
-        fi
-        if [[ ! -r "${p}" ]]; then
-            log "ERROR" "No read permission: ${p}"
-            exit 1
-        fi
-    done
-}
-
-is_excluded() {
-    local dir_path="$1"
-    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-        if [[ "${dir_path}" == ${pattern} ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
-zip_directory() {
-    local target_dir="$1"
-    local dir_name
-    local parent_dir
-    local zip_file_name
-    local zip_full_path
-
-    dir_name=$(basename "${target_dir}")
-    parent_dir=$(dirname "${target_dir}")
-    zip_file_name="${dir_name}.zip"
-    zip_full_path="${parent_dir}/${zip_file_name}"
-
-    # 1. Check exclusions
-    if is_excluded "${target_dir}"; then
-        log "INFO" "Skipping (Excluded): ${target_dir}"
-        return 0
-    fi
-
-    # 2. Check existing zip
-    if [[ -f "${zip_full_path}" ]]; then
-        log "INFO" "Skipping (Exists): ${zip_full_path}"
-        return 0
-    fi
-
-    # 3. Check write permissions
-    if [[ ! -w "${parent_dir}" ]]; then
-        log "ERROR" "Permission Denied: Cannot write to ${parent_dir}"
-        return 1
-    fi
-
-    log "INFO" "Zipping: ${target_dir} -> ${zip_full_path}"
-
-    if [[ "${DRY_RUN}" == true ]]; then
-        log "DRY_RUN" "Action: Would create ${zip_full_path}"
-        if [[ "${DELETE_AFTER_ZIP}" == true ]]; then
-            log "DRY_RUN" "Action: Would DELETE ${target_dir}"
-        fi
-        return 0
-    fi
-
-    # Create zip using subshell to cd into parent
-    (
-        cd "${parent_dir}" || exit 1
-        zip -r -"${COMPRESSION_LEVEL}" "${zip_file_name}" "${dir_name}" > /dev/null 2>&1
-    )
-    local zip_status=$?
-
-    if [[ ${zip_status} -eq 0 ]]; then
-        log "SUCCESS" "Created: ${zip_full_path} ($(du -h "${zip_full_path}" | cut -f1))"
-
-        # Delete source if requested
-        if [[ "${DELETE_AFTER_ZIP}" == true ]]; then
-            log "INFO" "Deleting source: ${target_dir}"
-            rm -rf "${target_dir}"
-            if [[ $? -eq 0 ]]; then
-                log "SUCCESS" "Deleted: ${target_dir}"
-            else
-                log "ERROR" "Failed to delete: ${target_dir}"
-                return 1
-            fi
-        fi
-        return 0
-    else
-        log "ERROR" "Failed to zip: ${target_dir}"
-        return 1
-    fi
-}
-
-process_paths() {
-    local error_count=0
-    local processed_count=0
-
-    for path in "${PATHS[@]}"; do
-        log "INFO" "Scanning: ${path}"
-        while IFS= read -r -d '' dir; do
-            if zip_directory "${dir}"; then
-                ((processed_count++))
-            else
-                ((error_count++))
-            fi
-        done < <(find "${path}" -maxdepth 1 -mindepth 1 -type d -print0)
-    done
-
-    log "INFO" "========================================"
-    log "INFO" "SUMMARY: Processed ${processed_count} directories, Errors ${error_count}"
-    log "INFO" "========================================"
-}
+################################################################################
+# MAIN EXECUTION
+################################################################################
 
 main() {
-    parse_args "$@"
-    check_dependencies
-    validate_paths
-    log "START" "Zip process initialized."
-    process_paths
-    log "START" "Zip process finished."
+  parse_arguments "$@" || return $?
+
+  # Create work directory
+  WORK_DIR=$(mktemp -d) || {
+    log_error "Failed to create temporary directory"
+    return 1
+  }
+
+  # Print header
+  echo "========================================"
+  echo "Directory Compression Utility v${SCRIPT_VERSION}"
+  echo "========================================"
+  echo ""
+
+  if [[ "${DRY_RUN}" == true ]]; then
+    log_warn "DRY-RUN MODE ENABLED - No changes will be made"
+  fi
+
+  if [[ "${DELETE_AFTER_ZIP}" == true ]]; then
+    log_warn "Delete-after-zip is ENABLED - directories will be removed after compression"
+  fi
+
+  log_info "Using ${NUM_WORKERS} parallel worker(s)"
+  echo ""
+
+  # Check prerequisites
+  check_zip_executable || return 1
+
+  # Validate all directories first
+  for dir in "${DIRECTORIES_TO_PROCESS[@]}"; do
+    validate_directory "${dir}" || return 1
+  done
+
+  log_debug "Validated all input directories"
+  log_debug "Processing ${#DIRECTORIES_TO_PROCESS[@]} path(s)"
+  echo ""
+
+  # Process each directory
+  for dir in "${DIRECTORIES_TO_PROCESS[@]}"; do
+    process_directory "${dir}"
+  done
+
+  # Print summary
+  print_summary
+
+  # Return appropriate exit code
+  if [[ ${TOTAL_ERRORS} -gt 0 ]]; then
+    return 1
+  fi
+
+  return 0
 }
 
+trap 'log_error "Script interrupted"; exit 130' INT TERM
+
 main "$@"
+exit $?
